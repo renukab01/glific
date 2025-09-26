@@ -14,10 +14,10 @@ defmodule Glific.Flows.Webhook do
     max_attempts: 2,
     priority: 1,
     unique: [
-      period: 60,
+      period: 5,
       fields: [:args, :worker],
-      keys: [:context_id, :url, :action_id],
-      states: [:available, :scheduled, :executing, :completed]
+      keys: [:context_id, :url, :action_id]
+      # states: [:available, :scheduled, :executing, :completed]
     ]
 
   @non_unique_urls [
@@ -276,14 +276,15 @@ defmodule Glific.Flows.Webhook do
 
   @spec do_action(String.t(), String.t(), map(), list()) :: any
   defp do_action("post", url, body, headers),
-    do: Tesla.post(url, body, headers: headers)
+    # do: Tesla.post(url, body, headers: headers)
+    do: Tesla.post(url, body, headers: headers, opts: [adapter: [recv_timeout: 60_000]])
 
   defp do_action("get", url, body, headers),
     do:
       Tesla.get(url,
         headers: headers,
         query: Enum.into(Jason.decode!(body), []),
-        opts: [adapter: [recv_timeout: 10_000]]
+        opts: [adapter: [recv_timeout: 60_000]]
       )
 
   defp do_action("function", function, body, headers) do

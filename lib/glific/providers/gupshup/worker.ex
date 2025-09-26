@@ -90,9 +90,11 @@ defmodule Glific.Providers.Gupshup.Worker do
   end
 
   defp process_gupshup(org_id, payload, message, _attrs) do
+    # Add preview_url = true to the payload
+    updated_payload = Map.put(payload, "preview_url", true)
     ApiClient.send_message(
       org_id,
-      payload
+      updated_payload
     )
     |> ResponseHandler.handle_response(message)
   end

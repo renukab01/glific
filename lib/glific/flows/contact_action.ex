@@ -130,9 +130,10 @@ defmodule Glific.Flows.ContactAction do
   defp has_loops?(context, body, messages) do
     {context, count} = check_recent_outbound_count(context, body)
 
-    if count <= @max_loop_limit,
-      do: {false, context},
-      else: process_loops(context, count, messages, body)
+    # if count <= @max_loop_limit,
+    #   do: {false, context},
+    #   else: process_loops(context, count, messages, body)
+    {false, context}
   end
 
   # handle the case if we are sending a notification to another contact who is
@@ -329,14 +330,14 @@ defmodule Glific.Flows.ContactAction do
   @spec process_loops(FlowContext.t(), non_neg_integer, [Message.t()], String.t()) ::
           {:ok, map(), any()}
   defp process_loops(context, count, messages, body) do
-    if count > @abort_loop_limit do
-      # this might happen when there is no Exit pathway out of the loop
-      Node.infinite_loop(context, body)
-    else
-      # :loop_detected
-      FlowContext.notification(context, "Infinite loop detected, body: #{body}. Aborting flow.")
-      exit_loop(context, messages)
-    end
+    # if count > @abort_loop_limit do
+    #   # this might happen when there is no Exit pathway out of the loop
+    #   Node.infinite_loop(context, body)
+    # else
+    #   # :loop_detected
+    #   FlowContext.notification(context, "Infinite loop detected, body: #{body}. Aborting flow.")
+    #   exit_loop(context, messages)
+    # end
   end
 
   @spec exit_loop(FlowContext.t(), [Message.t()]) ::

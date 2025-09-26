@@ -62,19 +62,21 @@ oban_crontab = [
   {"* 20-23 * * *", Glific.Jobs.MinuteWorker, args: %{job: :daily_low_traffic_tasks}}
 ]
 
-oban_engine = Oban.Pro.Engines.Smart
+#oban_engine = Oban.Pro.Engines.Smart
 
 oban_plugins = [
   # Prune jobs after 5 mins, gives us some time to go investigate if needed
-  {Oban.Pro.Plugins.DynamicPruner, mode: {:max_age, 5 * 60}, limit: 25_000},
+  #{Oban.Pro.Plugins.DynamicPruner, mode: {:max_age, 5 * 60}, limit: 25_000},
+  {Oban.Plugins.Pruner, [max_age: 5 * 60, limit: 25_000]},
   {Oban.Plugins.Cron, crontab: oban_crontab},
-  Oban.Pro.Plugins.DynamicLifeline
+  #Oban.Pro.Plugins.DynamicLifeline
+  Oban.Plugins.Lifeline,
 ]
 
 config :glific, Oban,
   prefix: "global",
   repo: Glific.Repo,
-  engine: oban_engine,
+  #engine: oban_engine,
   queues: oban_queues,
   plugins: oban_plugins,
   shutdown_grace_period: :timer.seconds(60)
@@ -83,7 +85,7 @@ config :glific, Oban,
 # We will revisit it once we build a better understanding
 config :tesla,
   adapter:
-    {Tesla.Adapter.Hackney, ssl_options: [{:middlebox_comp_mode, false}, {:verify, :verify_none}]}
+    {Tesla.Adapter.Hackney, ssl_options: [{:middlebox_comp_mode, false}, {:verify, :verify_none}], recv_timeout: 15_000}
 
 config :glific, :max_rate_limit_request, 60
 
